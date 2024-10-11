@@ -17,7 +17,7 @@ export default function Home() {
   }, []);
 
   const fetchPhotos = async () => {
-    const response = await axios.get('/api/photos');
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ROUTE}/api/photos`);
     const data = await response.data;
     setPhotos(data);
   };
@@ -26,7 +26,7 @@ export default function Home() {
   const handleUpload = async (file: RcFile) => {
 
     const imageUrl = await readFileAsDataURL(file);
-    const res = await axios.post('/api/photos',
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_ROUTE}/api/photos`,
       {
         url: imageUrl
       },
@@ -46,7 +46,7 @@ export default function Home() {
 // Submit comment based on photoId
 const handleCommentSubmit = async () => {
   if (selectedPhotoId && commentContent) {
-    await axios.post('/api/comments', {
+    await axios.post(`${process.env.NEXT_PUBLIC_API_ROUTE}/api/comments`, {
       content: commentContent,
       photoId: selectedPhotoId,
     },
@@ -115,7 +115,7 @@ return (
                       onChange={(e) => setCommentContent(e.target.value)}
                       onPressEnter={handleCommentSubmit}
                       placeholder="Add a comment"
-                      style={{ marginTop: '10px' }}
+                      className='mt-5'
                     />
                   )}
                 </>
