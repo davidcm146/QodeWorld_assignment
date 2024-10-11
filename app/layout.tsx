@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import 'antd/dist/reset.css';
-import { ConfigProvider, Layout } from "antd";
+import { ConfigProvider} from "antd";
 import "./globals.css";
 
 export const metadata: Metadata = {
