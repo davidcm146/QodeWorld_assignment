@@ -9,7 +9,7 @@ export async function POST(req: Request) {
         return NextResponse.json(photo, { status: 201 });
     } catch (error) {
         return NextResponse.json(
-            { message: "Failed to create photo" },
+            { message: error instanceof Error || error },
             { status: 500 }
         );
     }
@@ -22,7 +22,7 @@ export async function GET() {
         return NextResponse.json(photos, { status: 200 });
     } catch (error) {
         return NextResponse.json(
-            { message: "Failed to fetch photos" },
+            { message: error instanceof Error || error },
             { status: 500 }
         );
     }
