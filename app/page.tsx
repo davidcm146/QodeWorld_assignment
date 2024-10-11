@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Upload, Button, List, Input, message, Card, Divider } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { RcFile } from 'antd/es/upload';
 import { Photo } from '@/types/types';
 
 export default function Home() {
@@ -21,17 +22,18 @@ export default function Home() {
   };
 
   // Read file from device and transform it to URL to upload
-  const handleUpload = async (file: any) => {
+  const handleUpload = async (file: RcFile) => {
     const reader = new FileReader();
 
     reader.onloadend = async () => {
       const imageUrl = reader.result as string;
-      const res = await axios.post('/api/photos', {
-        headers: {
-          'Content-Type': 'application/json',
-        }},
-        { url: imageUrl },
-      );
+      const res = await axios.post('/api/photos', 
+      {
+        url: imageUrl 
+      }, 
+      {
+        headers: { 'Content-Type': 'application/json' }
+      });
 
       if (res.data) {
         message.success('Photo uploaded successfully');
@@ -52,9 +54,7 @@ export default function Home() {
         photoId: selectedPhotoId,
       },
       {
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       setCommentContent('');
       // Fetch again to get the latest comment
@@ -66,8 +66,10 @@ export default function Home() {
     <div className='p-5'>
       <Upload
         customRequest={({ file, onSuccess }) => {
-          handleUpload(file);
-          onSuccess && onSuccess(file);
+          handleUpload(file as RcFile);
+          if (onSuccess) {
+            onSuccess(file); // Explicitly call onSuccess if it exists
+          }
         }}
         showUploadList={false}
       >
