@@ -5,6 +5,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { RcFile } from 'antd/es/upload';
 import { Photo } from '@/types/types';
+import { readFileAsDataURL } from '@/helper/FileReader';
 
 export default function Home() {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -23,111 +24,107 @@ export default function Home() {
 
   // Read file from device and transform it to URL to upload
   const handleUpload = async (file: RcFile) => {
-    const reader = new FileReader();
 
-    reader.onloadend = async () => {
-      const imageUrl = reader.result as string;
-      const res = await axios.post('/api/photos', 
+    const imageUrl = await readFileAsDataURL(file);
+    const res = await axios.post('/api/photos',
       {
-        url: imageUrl 
-      }, 
-      {
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      if (res.data) {
-        message.success('Photo uploaded successfully');
-        fetchPhotos();
-      } else {
-        message.error('Failed to upload image');
-      }
-    };
-    reader.readAsDataURL(file);
-    return false;
-  };
-
-  // Submit comment based on photoId
-  const handleCommentSubmit = async () => {
-    if (selectedPhotoId && commentContent) {
-      await axios.post('/api/comments', {
-        content: commentContent,
-        photoId: selectedPhotoId,
+        url: imageUrl
       },
       {
         headers: { 'Content-Type': 'application/json' }
       });
-      setCommentContent('');
-      // Fetch again to get the latest comment
+
+    if (res.data) {
+      message.success('Photo uploaded successfully');
       fetchPhotos();
+    } else {
+      message.error('Failed to upload image');
     }
-  };
+  return false;
+};
 
-  return (
-    <div className='p-5'>
-      <Upload
-        customRequest={({ file, onSuccess }) => {
-          handleUpload(file as RcFile);
-          if (onSuccess) {
-            onSuccess(file); // Explicitly call onSuccess if it exists
-          }
-        }}
-        showUploadList={false}
-      >
-        <Button icon={<UploadOutlined />}>Upload Photo</Button>
-      </Upload>
+// Submit comment based on photoId
+const handleCommentSubmit = async () => {
+  if (selectedPhotoId && commentContent) {
+    await axios.post('/api/comments', {
+      content: commentContent,
+      photoId: selectedPhotoId,
+    },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    setCommentContent('');
+    // Fetch again to get the latest comment
+    fetchPhotos();
+  }
+};
 
-      <Divider />
+return (
+  <div className='p-5'>
+    <Upload
+      customRequest={({ file, onSuccess }) => {
+        handleUpload(file as RcFile);
+        if (onSuccess) {
+          onSuccess(file); // Explicitly call onSuccess if it exists
+        }
+      }}
+      showUploadList={false}
+    >
+      <Button icon={<UploadOutlined />}>Upload Photo</Button>
+    </Upload>
 
-      <List
-        itemLayout="vertical"
-        dataSource={photos}
-        renderItem={photo => (
-          <List.Item>
-            <Card
-              hoverable
-              cover={
-                <div>
-                  <div className='text-sm text-slate-500 my-3 text-center'>
-                    {new Date(photo.createdAt).toLocaleString()}
-                  </div>
-                  <img src={photo.url} alt={photo.id.toString()} className='w-48 h-48 object-cover rounded-lg mx-auto' />
+    <Divider />
+
+    <List
+      itemLayout="vertical"
+      dataSource={photos}
+      renderItem={photo => (
+        <List.Item>
+          <Card
+            hoverable
+            cover={
+              <div>
+                <div className='text-sm text-slate-500 my-3 text-center'>
+                  {new Date(photo.createdAt).toLocaleString()}
                 </div>
-              }
-              actions={[
-                <Button onClick={() => setSelectedPhotoId(photo.id)} key="comment">
-                  Add Comment
-                </Button>,
-              ]}
-            >
-              <Card.Meta
-                description={
-                  <>
-                    <div>
-                      {photo.comments.map(comment => (
-                        <div key={comment.id} className='mb-2'>
-                          <div className='font-semibold'>{comment.content}</div>
-                          <div className='text-sm text-slate-500'>
-                            {new Date(comment.createdAt).toLocaleString()}
-                          </div>
+                <img src={photo.url} alt={photo.id.toString()} className='w-48 h-48 object-cover rounded-lg mx-auto' />
+              </div>
+            }
+            actions={[
+              <Button onClick={() => setSelectedPhotoId(photo.id)} key="comment">
+                Add Comment
+              </Button>,
+            ]}
+          >
+            <Card.Meta
+              description={
+                <>
+                  <div>
+                    {photo.comments.map(comment => (
+                      <div key={comment.id} className='mb-2'>
+                        <div className='font-semibold'>{comment.content}</div>
+                        <div className='text-sm text-slate-500'>
+                          {new Date(comment.createdAt).toLocaleString()}
                         </div>
-                      ))}
-                    </div>
-                    {selectedPhotoId === photo.id && (
-                      <Input
-                        value={commentContent}
-                        onChange={(e) => setCommentContent(e.target.value)}
-                        onPressEnter={handleCommentSubmit}
-                        placeholder="Add a comment"
-                        style={{ marginTop: '10px' }}
-                      />
-                    )}
-                  </>
-                }
-              />
-            </Card>
-          </List.Item>
-        )}
-      />
-    </div>
-  );
+                      </div>
+                    ))}
+                  </div>
+                  {selectedPhotoId === photo.id && (
+                    <Input
+                      value={commentContent}
+                      onChange={(e) => setCommentContent(e.target.value)}
+                      onPressEnter={handleCommentSubmit}
+                      placeholder="Add a comment"
+                      style={{ marginTop: '10px' }}
+                    />
+                  )}
+                </>
+              }
+            />
+          </Card>
+        </List.Item>
+      )}
+    />
+  </div>
+);
 }

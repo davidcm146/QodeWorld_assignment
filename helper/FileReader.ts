@@ -1,4 +1,6 @@
-export const readFileAsDataURL = (file: File): Promise<string> => {
+import { RcFile } from "antd/es/upload";
+
+export const readFileAsDataURL = (file: RcFile): Promise<string> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
