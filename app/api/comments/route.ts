@@ -1,15 +1,26 @@
-import {NextResponse} from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
-    const {content, photoId} = await req.json();
+    try {
+        const { content, photoId } = await req.json();
 
-    const comment = await prisma.comment.create({
-        data : {
-            content, photoId
-        }
-    })
+        const comment = await prisma.comment.create({
+            data: {
+                content,
+                photoId,
+            },
+        });
 
-    return NextResponse.json(comment, {status : 201});
+        return NextResponse.json(comment, { status: 201 });
+    } catch (error) {
+        console.error("Error creating comment:", error);
+
+        return NextResponse.json(
+            { message: "Failed to create comment" },
+            { status: 500 }
+        );
+    }
 }
