@@ -43,88 +43,94 @@ export default function Home() {
   return false;
 };
 
-// Submit comment based on photoId
-const handleCommentSubmit = async () => {
-  if (selectedPhotoId && commentContent) {
-    await axios.post(`${process.env.NEXT_PUBLIC_API_ROUTE}/api/comments`, {
-      content: commentContent,
-      photoId: selectedPhotoId,
-    },
-      {
-        headers: { 'Content-Type': 'application/json' }
-      });
-    setCommentContent('');
-    // Fetch again to get the latest comment
-    fetchPhotos();
-  }
-};
+  // Submit comment based on photoId
+  const handleCommentSubmit = async () => {
+    if (selectedPhotoId && commentContent) {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_ROUTE}/api/comments`, {
+        content: commentContent,
+        photoId: selectedPhotoId,
+      },
+        {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      setCommentContent('');
+      // Fetch again to get the latest comment
+      fetchPhotos();
+    }
+  };
 
-return (
-  <div className='p-5'>
-    <Upload
-      customRequest={({ file, onSuccess }) => {
-        handleUpload(file as RcFile);
-        if (onSuccess) {
-          onSuccess(file); // Explicitly call onSuccess if it exists
-        }
-      }}
-      showUploadList={false}
-    >
-      <Button icon={<UploadOutlined />}>Upload Photo</Button>
-    </Upload>
+  return (
+    <div className='p-5'>
+      <Upload
+        customRequest={({ file, onSuccess }) => {
+          handleUpload(file as RcFile);
+          if (onSuccess) {
+            onSuccess(file); // Explicitly call onSuccess if it exists
+          }
+        }}
+        showUploadList={false}
+      >
+        <Button icon={<UploadOutlined />}>Upload Photo</Button>
+      </Upload>
 
-    <Divider />
+      <Divider />
 
-    <List
-      itemLayout="vertical"
-      dataSource={photos}
-      renderItem={photo => (
-        <List.Item>
-          <Card
-            hoverable
-            cover={
-              <div>
-                <div className='text-sm text-slate-500 my-3 text-center'>
-                  {new Date(photo.createdAt).toLocaleString()}
-                </div>
-                <img src={photo.url} alt={photo.id.toString()} className='w-48 h-48 object-cover rounded-lg mx-auto' />
-              </div>
-            }
-            actions={[
-              <Button onClick={() => setSelectedPhotoId(photo.id)} key="comment">
-                Add Comment
-              </Button>,
-            ]}
-          >
-            <Card.Meta
-              description={
-                <>
-                  <div>
-                    {photo.comments.map(comment => (
-                      <div key={comment.id} className='mb-2'>
-                        <div className='font-semibold'>{comment.content}</div>
-                        <div className='text-sm text-slate-500'>
-                          {new Date(comment.createdAt).toLocaleString()}
-                        </div>
-                      </div>
-                    ))}
+      <List
+        itemLayout="vertical"
+        dataSource={photos}
+        renderItem={photo => (
+          <List.Item>
+            <Card
+              hoverable
+              cover={
+                <div>
+                  <div className='text-sm text-slate-500 my-3 text-center'>
+                    {new Date(photo.createdAt).toLocaleString()}
                   </div>
-                  {selectedPhotoId === photo.id && (
-                    <Input
-                      value={commentContent}
-                      onChange={(e) => setCommentContent(e.target.value)}
-                      onPressEnter={handleCommentSubmit}
-                      placeholder="Add a comment"
-                      className='mt-5'
-                    />
-                  )}
-                </>
+                  <img src={photo.url} alt={photo.id.toString()} className='w-48 h-48 object-cover rounded-lg mx-auto' />
+                </div>
               }
-            />
-          </Card>
-        </List.Item>
-      )}
-    />
-  </div>
-);
+              actions={[
+                <Button onClick={() => setSelectedPhotoId(photo.id)} key="comment">
+                  Add Comment
+                </Button>,
+              ]}
+            >
+              <Card.Meta
+                description={
+                  <>
+                    <div>
+                      {photo.comments.map(comment => (
+                        <div key={comment.id} className='mb-2'>
+                          <div className='font-semibold'>{comment.content}</div>
+                          <div className='text-sm text-slate-500'>
+                            {new Date(comment.createdAt).toLocaleString()}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedPhotoId === photo.id && (
+                      <div className='mt-5'>
+                        <Input
+                          value={commentContent}
+                          onChange={(e) => setCommentContent(e.target.value)}
+                          placeholder="Add a comment"
+                        />
+                        <Button 
+                          type="primary" 
+                          onClick={handleCommentSubmit} 
+                          className='mt-2'>
+                          Submit Comment
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                }
+              />
+            </Card>
+          </List.Item>
+        )}
+      />
+    </div>
+  );
 }
